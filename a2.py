@@ -3,6 +3,7 @@ from random import randint
 from math import floor
 
 
+# Sequential Merge
 def seq_merge(A, B):
     """ Performs a sequential merge on two arrays """
     i, j = 0, 0
@@ -23,16 +24,54 @@ def seq_merge(A, B):
     return C
 
 
+# TESTING FUNCTIONS
+def is_sorted(C):
+    """ Checks if array is sorted """
+    if not C:
+        return True
+    elif len(C) == 1:
+        return True
+    else:
+        for i in range(1, len(C)):
+            if C[i] < C[i - 1]:
+                return False
+        return True
+
+
+def does_merged_list_match(A, B, C):
+    """ Checks if array C contains all of the values in both A and B and the
+    same frequencies """
+    orig_dict = {}
+    for item in A:
+        if item in orig_dict:
+            orig_dict[item] += 1
+        else:
+            orig_dict[item] = 1
+    for item in B:
+        if item in orig_dict:
+            orig_dict[item] += 1
+        else:
+            orig_dict[item] = 1
+    merged_dict = {}
+    for item in C:
+        if item in merged_dict:
+            merged_dict[item] += 1
+        else:
+            merged_dict[item] = 1
+    return orig_dict == merged_dict
+
+
+# MAIN
 def main():
     comm = MPI.COMM_WORLD
     p = comm.Get_size()
     my_rank = comm.Get_rank()
 
-    n = 1000000  # Array size
+    n = 10  # Array size
 
     if my_rank == 0:
-        A = sorted([randint(1, 10000000) for _ in range(n)])
-        B = sorted([randint(1, 10000000) for _ in range(n)])
+        A = sorted([randint(1, 100) for _ in range(n)])
+        B = sorted([randint(1, 100) for _ in range(n)])
         C = []
 
         print(A)
@@ -96,6 +135,8 @@ def main():
             C.extend(inbound_data)
 
         print(C)
+        # print(is_sorted(C))
+        # print(does_merged_list_match(A, B, C))
 
     else:
         inbound_data = comm.recv(source=0, tag=0)
